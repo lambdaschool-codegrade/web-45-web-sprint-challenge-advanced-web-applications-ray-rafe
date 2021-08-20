@@ -1,20 +1,71 @@
-import React from "react";
+import axios from "axios";
+import React, { useState } from "react";
 
-const Login = () => {
-  // make a post request to retrieve a token from the api
-  // when you have handled the token, navigate to the BubblePage route
+const Login = (props) => {
+  const { push } = props.history;
 
-  const error = "";
-  //replace with error state
+  const initialFormValues = {
+    username: "",
+    password: "",
+  };
+  const [formValues, setFormValues] = useState(initialFormValues);
+
+  const [error, setError] = useState("");
+  const handleChange = (e) => {
+    setFormValues({
+      ...formValues,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    axios
+      .post("http://localhost:5000/api/login", formValues)
+      .then((res) => {
+        console.log("login res: ", res);
+        setError("");
+        localStorage.setItem("token", res.data.payload);
+        push("/bubbles");
+      })
+      .catch((err) => {
+        setError("Username or Password not valid");
+      });
+  };
 
   return (
     <div>
       <h1>Welcome to the Bubble App!</h1>
       <div data-testid="loginForm" className="login-form">
-        <h2>Build login form here</h2>
+        <h2>Log in: </h2>
+        <form onSubmit={handleSubmit}>
+          <label>
+            Username:
+            <input
+              type="text"
+              name="username"
+              id="username"
+              value={formValues.username}
+              onChange={handleChange}
+            />
+          </label>
+          <label>
+            Password:
+            <input
+              type="password"
+              name="password"
+              id="password"
+              value={formValues.password}
+              onChange={handleChange}
+            />
+          </label>
+          <button id="submit">Log in</button>
+        </form>
       </div>
 
-      <p id="error" className="error">{error}</p>
+      <p id="error" className="error">
+        {error}
+      </p>
     </div>
   );
 };
